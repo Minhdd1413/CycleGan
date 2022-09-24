@@ -3,7 +3,7 @@ from CustomDataset import ImageDataset  # Xử lý dataset
 from Network import Generator, Discriminator # G và D network
 from DecayEpochs import DecayLR # Optimize Epochs
 from torchvision import transforms
-from utils import weights_init, ReplayBuffer
+from utils import weights_init, ReplayBuffer # Custom weight va loss, do mang cycle mang thuoc tinh cua ca 2 mang GAN ><
 from tqdm import tqdm
 
 import torchvision
@@ -133,7 +133,7 @@ for epoch in range(0, epochs):
 
         # Tính gradients của G_A và G_B
         errG.backward()
-        # Update G_A and G_B's weights
+        # Update G_A va G_B's weights
         optimizer_G.step()
 
         ''' ------------------------------------------- '''
