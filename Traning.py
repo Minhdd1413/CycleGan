@@ -18,6 +18,20 @@ batch_size = 1 # mini-batch size (default: 1), this is the total batch size of a
 image_size = 256 # Default
 print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
 lr = 0.0002
+
+# Make progress-milestone folder
+try:
+    os.makedirs(sample_out_dir)
+except OSError:
+    pass
+
+# Make save-model folder
+try:
+    os.makedirs(pre_train_dir)
+except OSError:
+    pass
+
+# Set dir
 data_in_dir = "./data/horse2zebra" # Real data
 sample_out_dir = "./Sample" # Check training process by images
 pre_train_dir = "./Pre_train/horse2zebra" # Folder save Pre-train model 
