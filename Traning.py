@@ -1,7 +1,7 @@
 # Import thư viện
 from CustomDataset import ImageDataset  # Xử lý dataset
 from Network import Generator, Discriminator # G và D network
-from DecayEpochs import DecayLR # 
+from DecayEpochs import DecayLR # Optimize Epochs
 from torchvision import transforms
 from utils import weights_init, ReplayBuffer
 from tqdm import tqdm
@@ -13,14 +13,14 @@ import itertools
 
 # Hyperparameter settings
 epochs = 200 # Loops
-decay_epochs = 100 # Số vòng lặp để chạy hàm tuyến tính hoá learning rate
+decay_epochs = 100 # Optimize learning rate
 batch_size = 1 # mini-batch size (default: 1), this is the total batch size of all GPUs on the current node when using Data Parallel or Distributed Data Parallel
 image_size = 256 # Default
 print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
 lr = 0.0002
-data_in_dir = "./CycleGAN/data/horse2zebra"
-sample_out_dir = "./CycleGAN/Sample"
-pre_train_dir = "./CycleGAN/Pre_train/horse2zebra"
+data_in_dir = "./data/horse2zebra" # Real data
+sample_out_dir = "./Sample" # Check training process by images
+pre_train_dir = "./Pre_train/horse2zebra" # Folder save Pre-train model 
 
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -195,7 +195,7 @@ for epoch in range(0, epochs):
                               sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
-    # Lấy điểm 
+    # Lấy data points dc train 
     torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
     torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
     torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
