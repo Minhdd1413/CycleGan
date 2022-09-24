@@ -18,7 +18,6 @@ batch_size = 1 # mini-batch size (default: 1), this is the total batch size of a
 image_size = 256 # Default
 print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
 lr = 0.0002
-
 data_in_dir = "./CycleGAN/data/horse2zebra"
 sample_out_dir = "./CycleGAN/Sample"
 
@@ -196,10 +195,10 @@ for epoch in range(0, epochs):
                               normalize=True)
 
     # Lấy điểm 
-    torch.save(netG_A_to_B.state_dict(), f"weights/{args.dataset}/netG_A_to_B_epoch_{epoch}.pth")
-    torch.save(netG_B_to_A.state_dict(), f"weights/{args.dataset}/netG_B_to_A_epoch_{epoch}.pth")
-    torch.save(netD_A.state_dict(), f"weights/{args.dataset}/netD_A_epoch_{epoch}.pth")
-    torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B_epoch_{epoch}.pth")
+    torch.save(netG_A_to_B.state_dict(), f"weights/horse2zebra/netG_A_to_B_epoch_{epoch}.pth")
+    torch.save(netG_B_to_A.state_dict(), f"weights/horse2zebra/netG_B_to_A_epoch_{epoch}.pth")
+    torch.save(netD_A.state_dict(), f"weights/horse2zebra/netD_A_epoch_{epoch}.pth")
+    torch.save(netD_B.state_dict(), f"weights/horse2zebra/netD_B_epoch_{epoch}.pth")
 
     # Update learning rates
     lr_scheduler_G.step()
@@ -207,11 +206,7 @@ for epoch in range(0, epochs):
     lr_scheduler_D_B.step()
 
 # Save điểm cuối
-torch.save(netG_A_to_B.state_dict(), f"weights/{args.dataset}/netG_A_to_B.pth")
-torch.save(netG_B_to_A.state_dict(), f"weights/{args.dataset}/netG_B_to_A.pth")
-torch.save(netD_A.state_dict(), f"weights/{args.dataset}/netD_A.pth")
-<<<<<<< HEAD:Tranning.py
-torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B.pth")
-=======
-torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B.pth")
->>>>>>> e10662e483ce582beaeb108831de1d92c29cd599:Traning.py
+torch.save(netG_A_to_B.state_dict(), f"Pre_train/horse2zebra/netG_A_to_B.pth")
+torch.save(netG_B_to_A.state_dict(), f"Pre_train/horse2zebra/netG_B_to_A.pth")
+torch.save(netD_A.state_dict(), f"Pre_train/horse2zebra/netD_A.pth")
+torch.save(netD_B.state_dict(), f"Pre_train/horse2zebra/netD_B.pth")
