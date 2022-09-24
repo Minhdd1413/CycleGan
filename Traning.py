@@ -19,22 +19,23 @@ image_size = 256 # Default
 print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
 lr = 0.0002
 
-# Make progress-milestone folder
+# Define dir
+sample_out_dir = "./Sample" # Check training process by images
+pre_train_dir = "./Pre_train/horse2zebra" # Folder save Pre-train model 
+
+# ---Make some folder---
 try:
-    os.makedirs(sample_out_dir)
+    os.makedirs(sample_out_dir) # Timelapse image processing
 except OSError:
     pass
 
-# Make save-model folder
 try:
-    os.makedirs(pre_train_dir)
+    os.makedirs(pre_train_dir) # Save pre-train model
 except OSError:
     pass
 
 # Set dir
 data_in_dir = "./data/horse2zebra" # Real data
-sample_out_dir = "./Sample" # Check training process by images
-pre_train_dir = "./Pre_train/horse2zebra" # Folder save Pre-train model 
 
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -168,6 +169,7 @@ for epoch in range(0, epochs):
 
         # Real B image loss
         real_output_B = netD_B(real_image_B)
+
         errD_real_B = adversarial_loss(real_output_B, real_label)
 
         # Fake B image loss
