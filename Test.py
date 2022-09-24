@@ -10,8 +10,8 @@ from Network import Generator # G network
 
 cuda = "store_true"
 image_size = 256
-data_in_dir = "./CycleGAN/data/horse2zebra" # Real data
-pre_train_dir = "./CycleGAN/Pre_train" # Pre-train
+data_in_dir = "./data/horse2zebra" # Real data
+pre_train_dir = "./Pre_train" # Pre-train
 cudnn.benchmark = True
 
 
