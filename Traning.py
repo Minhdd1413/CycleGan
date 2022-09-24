@@ -178,20 +178,20 @@ for epoch in range(0, epochs):
 
         if i % print_freq == 0:
             torchvision.utils.save_image(real_image_A,
-                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
             torchvision.utils.save_image(real_image_B,
-                              sample_out_dir + "/B" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/B" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
             fake_image_A = 0.5 * (netG_B_to_A(real_image_B).data + 1.0)
             fake_image_B = 0.5 * (netG_A_to_B(real_image_A).data + 1.0)
 
             torchvision.utils.save_image(fake_image_A.detach(),
-                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
             torchvision.utils.save_image(fake_image_B.detach(),
-                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
 
