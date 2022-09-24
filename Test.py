@@ -3,18 +3,27 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
-from tqdm import tqdm
+import os
 
+from tqdm import tqdm
 from CustomDataset import ImageDataset  # Xử lý testset
 from Network import Generator # G network
 
+# Hyperparameter
 cuda = "store_true"
 image_size = 256
 data_in_dir = "./data/horse2zebra" # Real data
 pre_train_dir = "./Pre_train" # Pre-train
+result = ""
 cudnn.benchmark = True
 
+# Make result folder
+try:
+    os.makedirs(args.outf)
+except OSError:
+    pass
 
+# Setup device
 if torch.cuda.is_available() and not cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
