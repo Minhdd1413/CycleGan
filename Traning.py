@@ -160,9 +160,9 @@ for epoch in range(0, epochs):
         # Update D_A weights
         optimizer_D_A.step()
 
-        ##############################################
+        ''' ------------------------------------------- '''
         # (3) Update D network: Discriminator B
-        ##############################################
+        ''' ------------------------------------------- '''
 
         # Set D_B gradients == zero
         optimizer_D_B.zero_grad()
