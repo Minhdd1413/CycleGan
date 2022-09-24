@@ -10,8 +10,8 @@ from Network import Generator # G network
 
 cuda = "store_true"
 image_size = 256
-data_in_dir = data_in_dir = "./CycleGAN/data/horse2zebra"
-pre_train_dir = "./CycleGAN/Pre_train"
+data_in_dir = "./CycleGAN/data/horse2zebra" # Real data
+pre_train_dir = "./CycleGAN/Pre_train" # Pre-train
 cudnn.benchmark = True
 
 
@@ -36,8 +36,8 @@ netG_A2B = Generator().to(device)
 netG_B2A = Generator().to(device)
 
 # Load state dicts
-netG_A2B.load_state_dict(torch.load("./CycleGAN/Pre_train" + "netG_A2B.pth"))
-netG_B2A.load_state_dict(torch.load("./CycleGAN/Pre_train" + "netG_B2A.pth"))
+netG_A2B.load_state_dict(torch.load(pre_train_dir + "netG_A2B.pth"))
+netG_B2A.load_state_dict(torch.load(pre_train_dir + "netG_B2A.pth"))
 
 # Set model mode
 netG_A2B.eval()
