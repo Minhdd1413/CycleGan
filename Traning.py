@@ -20,6 +20,7 @@ print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
 lr = 0.0002
 data_in_dir = "./CycleGAN/data/horse2zebra"
 sample_out_dir = "./CycleGAN/Sample"
+pre_train_dir = "./CycleGAN/Pre_train/horse2zebra"
 
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -195,10 +196,10 @@ for epoch in range(0, epochs):
                               normalize=True)
 
     # Lấy điểm 
-    torch.save(netG_A_to_B.state_dict(), f"Pre_train/horse2zebra/netG_A_to_B_epoch_{epoch}.pth")
-    torch.save(netG_B_to_A.state_dict(), f"Pre_train/horse2zebra/netG_B_to_A_epoch_{epoch}.pth")
-    torch.save(netD_A.state_dict(), f"Pre_train/horse2zebra/netD_A_epoch_{epoch}.pth")
-    torch.save(netD_B.state_dict(), f"Pre_train/horse2zebra/netD_B_epoch_{epoch}.pth")
+    torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
+    torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
+    torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
+    torch.save(netD_B.state_dict(), pre_train_dir + f"/netD_B_epoch_{epoch}.pth")
 
     # Update learning rates
     lr_scheduler_G.step()
@@ -206,7 +207,7 @@ for epoch in range(0, epochs):
     lr_scheduler_D_B.step()
 
 # Save điểm cuối
-torch.save(netG_A_to_B.state_dict(), f"Pre_train/horse2zebra/netG_A_to_B.pth")
-torch.save(netG_B_to_A.state_dict(), f"Pre_train/horse2zebra/netG_B_to_A.pth")
-torch.save(netD_A.state_dict(), f"Pre_train/horse2zebra/netD_A.pth")
-torch.save(netD_B.state_dict(), f"Pre_train/horse2zebra/netD_B.pth")
+torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
+torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
+torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
+torch.save(netD_B.state_dict(), pre_train_dir + f"/netD_B_epoch_{epoch}.pth")
