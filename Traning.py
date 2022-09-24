@@ -128,7 +128,7 @@ for epoch in range(0, epochs):
         recovered_image_B = netG_A_to_B(fake_image_A)
         loss_cycle_BAB = cycle_loss(recovered_image_B, real_image_B) * 10.0
 
-        # Cộng loss and calculate gradients
+        # Cộng loss va tinh gradients
         errG = loss_identity_A + loss_identity_B + loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB
 
         # Tính gradients của G_A và G_B
