@@ -12,9 +12,6 @@ from Network import Generator # G network
 # Hyperparameter
 cuda = "store_true"
 image_size = 256
-data_in_dir = "./data/horse2zebra" # Real data
-pre_train_dir = "./Pre_train" # Pre-train
-result = ""
 cudnn.benchmark = True
 
 # Make result folder
@@ -22,6 +19,10 @@ try:
     os.makedirs(args.outf)
 except OSError:
     pass
+
+# Set dir
+data_in_dir = "./data/horse2zebra" # Real data
+pre_train_dir = "./Pre_train" # Pre-train
 
 # Setup device
 if torch.cuda.is_available() and not cuda:
