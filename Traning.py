@@ -195,10 +195,10 @@ for epoch in range(0, epochs):
                               normalize=True)
 
     # Lấy điểm 
-    torch.save(netG_A_to_B.state_dict(), f"weights/horse2zebra/netG_A_to_B_epoch_{epoch}.pth")
-    torch.save(netG_B_to_A.state_dict(), f"weights/horse2zebra/netG_B_to_A_epoch_{epoch}.pth")
-    torch.save(netD_A.state_dict(), f"weights/horse2zebra/netD_A_epoch_{epoch}.pth")
-    torch.save(netD_B.state_dict(), f"weights/horse2zebra/netD_B_epoch_{epoch}.pth")
+    torch.save(netG_A_to_B.state_dict(), f"Pre_train/horse2zebra/netG_A_to_B_epoch_{epoch}.pth")
+    torch.save(netG_B_to_A.state_dict(), f"Pre_train/horse2zebra/netG_B_to_A_epoch_{epoch}.pth")
+    torch.save(netD_A.state_dict(), f"Pre_train/horse2zebra/netD_A_epoch_{epoch}.pth")
+    torch.save(netD_B.state_dict(), f"Pre_train/horse2zebra/netD_B_epoch_{epoch}.pth")
 
     # Update learning rates
     lr_scheduler_G.step()
