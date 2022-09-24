@@ -210,4 +210,8 @@ for epoch in range(0, epochs):
 torch.save(netG_A_to_B.state_dict(), f"weights/{args.dataset}/netG_A_to_B.pth")
 torch.save(netG_B_to_A.state_dict(), f"weights/{args.dataset}/netG_B_to_A.pth")
 torch.save(netD_A.state_dict(), f"weights/{args.dataset}/netD_A.pth")
+<<<<<<< HEAD:Tranning.py
 torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B.pth")
+=======
+torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B.pth")
+>>>>>>> e10662e483ce582beaeb108831de1d92c29cd599:Traning.py
