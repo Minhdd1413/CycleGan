@@ -1,68 +1,42 @@
-from CustomDataset import ImageDataset
-from Network import Generator, Discriminator
-from DecayEpochs import DecayLR
+# Import thư viện
+from CustomDataset import ImageDataset  # Xử lý dataset
+from Network import Generator, Discriminator # G và D network
+from DecayEpochs import DecayLR # 
 from torchvision import transforms
 from utils import weights_init, ReplayBuffer
 from tqdm import tqdm
 
-import os
+import torchvision
+import PIL.Image as Img
 import torch
 import itertools
-import argparse
 
+# Hyperparameter settings
+epochs = 200 # Loops
+decay_epochs = 100 # Số vòng lặp để chạy hàm tuyến tính hoá learning rate
+batch_size = 1 # mini-batch size (default: 1), this is the total batch size of all GPUs on the current node when using Data Parallel or Distributed Data Parallel
+image_size = 256 # Default
+print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
+lr = 0.0002
 
-parser = argparse.ArgumentParser(
-    description="PyTorch implements `Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks`")
-parser.add_argument("--dataroot", type=str, default="./data",
-                    help="path to datasets. (default:./data)")
-parser.add_argument("--dataset", type=str, default="horse2zebra",
-                    help="dataset name. (default:`horse2zebra`)"
-                         "Option: [apple2orange, summer2winter_yosemite, horse2zebra, monet2photo, "
-                         "cezanne2photo, ukiyoe2photo, vangogh2photo, maps, facades, selfie2anime, "
-                         "iphone2dslr_flower, ae_photos, ]")
-parser.add_argument("--epochs", default=200, type=int, metavar="N",
-                    help="number of total epochs to run")
-parser.add_argument("--decay_epochs", type=int, default=100,
-                    help="epoch to start linearly decaying the learning rate to 0. (default:100)")
-parser.add_argument("-b", "--batch-size", default=1, type=int,
-                    metavar="N",
-                    help="mini-batch size (default: 1), this is the total "
-                         "batch size of all GPUs on the current node when "
-                         "using Data Parallel or Distributed Data Parallel")
-parser.add_argument("--lr", type=float, default=0.0002,
-                    help="learning rate. (default:0.0002)")
-parser.add_argument("-p", "--print-freq", default=100, type=int,
-                    metavar="N", help="print frequency. (default:100)")
-parser.add_argument("--cuda", action="store_true", help="Enables cuda")
-parser.add_argument("--netG_A2B", default="", help="path to netG_A2B (to continue training)")
-parser.add_argument("--netG_B2A", default="", help="path to netG_B2A (to continue training)")
-parser.add_argument("--netD_A", default="", help="path to netD_A (to continue training)")
-parser.add_argument("--netD_B", default="", help="path to netD_B (to continue training)")
-parser.add_argument("--image-size", type=int, default=256,
-                    help="size of the data crop (squared assumed). (default:256)")
-parser.add_argument("--outf", default="./outputs",
-                    help="folder to output images. (default:`./outputs`).")
-parser.add_argument("--manualSeed", type=int,
-                    help="Seed for initializing training. (default:none)")
-
-args = parser.parse_args()
-print(args)
+data_in_dir = "./CycleGAN/data/horse2zebra"
+sample_out_dir = "./CycleGAN/Sample"
 
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
 # Loading data
-dataset = ImageDataset(root=os.path.join(args.dataroot, args.dataset),
+dataset = ImageDataset(root=data_in_dir,
                        transform=transforms.Compose([
-                           transforms.Resize(int(args.image_size * 1.12), "D:/Coding/CycleGAN/trainAB"),
-                           transforms.RandomCrop(args.image_size),
+                           transforms.Resize(int(image_size * 1.12), Img.BICUBIC),
+                           transforms.RandomCrop(image_size),
                            transforms.RandomHorizontalFlip(),
                            transforms.ToTensor(),
                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]),
                        unaligned=True)
 
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, pin_memory=True)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
 
 # Loading Model
 netG_A_to_B = Generator().to(device)
@@ -82,11 +56,11 @@ adversarial_loss = torch.nn.MSELoss().to(device)
 
 # Optimizers
 optimizer_G = torch.optim.Adam(itertools.chain(netG_A_to_B.parameters(), netG_B_to_A.parameters()),
-                               lr=args.lr, betas=(0.5, 0.999))
-optimizer_D_A = torch.optim.Adam(netD_A.parameters(), lr=args.lr, betas=(0.5, 0.999))
-optimizer_D_B = torch.optim.Adam(netD_B.parameters(), lr=args.lr, betas=(0.5, 0.999))
+                               lr=lr, betas=(0.5, 0.999))
+optimizer_D_A = torch.optim.Adam(netD_A.parameters(), lr=lr, betas=(0.5, 0.999))
+optimizer_D_B = torch.optim.Adam(netD_B.parameters(), lr=lr, betas=(0.5, 0.999))
 
-lr_lambda = DecayLR(args.epochs, 0, args.decay_epochs).step
+lr_lambda = DecayLR(epochs, 0, decay_epochs).step
 lr_scheduler_G = torch.optim.lr_scheduler.LambdaLR(optimizer_G, lr_lambda=lr_lambda)
 lr_scheduler_D_A = torch.optim.lr_scheduler.LambdaLR(optimizer_D_A, lr_lambda=lr_lambda)
 lr_scheduler_D_B = torch.optim.lr_scheduler.LambdaLR(optimizer_D_B, lr_lambda=lr_lambda)
@@ -94,7 +68,7 @@ lr_scheduler_D_B = torch.optim.lr_scheduler.LambdaLR(optimizer_D_B, lr_lambda=lr
 fake_A_buffer = ReplayBuffer()
 fake_B_buffer = ReplayBuffer()
 # Building loop
-for epoch in range(0, args.epochs):
+for epoch in range(0, epochs):
     progress_bar = tqdm(enumerate(dataloader), total=len(dataloader))
     for i, data in progress_bar:
         # get batch size data
@@ -195,29 +169,29 @@ for epoch in range(0, args.epochs):
         optimizer_D_B.step()
 
         progress_bar.set_description(
-            f"[{epoch}/{args.epochs - 1}][{i}/{len(dataloader) - 1}] "
+            f"[{epoch}/{epochs - 1}][{i}/{len(dataloader) - 1}] "
             f"Loss_D: {(errD_A + errD_B).item():.4f} "
             f"Loss_G: {errG.item():.4f} "
             f"Loss_G_identity: {(loss_identity_A + loss_identity_B).item():.4f} "
             f"loss_G_GAN: {(loss_GAN_A2B + loss_GAN_B2A).item():.4f} "
             f"loss_G_cycle: {(loss_cycle_ABA + loss_cycle_BAB).item():.4f}")
 
-        if i % args.print_freq == 0:
-            torch.nn.utils.save_image(real_image_A,
-                              f"{args.outf}/{args.dataset}/A/real_samples_epoch_{epoch}_{i}.png",
+        if i % print_freq == 0:
+            torchvision.utils.save_image(real_image_A,
+                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
-            torch.nn.utils.save_image(real_image_B,
-                              f"{args.outf}/{args.dataset}/B/real_samples_epoch_{epoch}_{i}.png",
+            torchvision.utils.save_image(real_image_B,
+                              sample_out_dir + "/B" + "/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
             fake_image_A = 0.5 * (netG_B_to_A(real_image_B).data + 1.0)
             fake_image_B = 0.5 * (netG_A_to_B(real_image_A).data + 1.0)
 
-            torch.nn.utils.save_image(fake_image_A.detach(),
-                              f"{args.outf}/{args.dataset}/A/fake_samples_epoch_{epoch}_{i}.png",
+            torchvision.utils.save_image(fake_image_A.detach(),
+                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
-            torch.nn.utils.save_image(fake_image_B.detach(),
-                              f"{args.outf}/{args.dataset}/B/fake_samples_epoch_{epoch}_{i}.png",
+            torchvision.utils.save_image(fake_image_B.detach(),
+                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
 
