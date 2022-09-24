@@ -14,15 +14,31 @@ cuda = "store_true"
 image_size = 256
 cudnn.benchmark = True
 
-# Make result folder
+# define dir
+Result = "./Result"
+Result_A = "./Result/A"
+Result_B = "./Result/B"
+
+# ---Make result folder---
 try:
-    os.makedirs(args.outf)
+    os.makedirs(Result)
+except OSError:
+    pass
+
+try:
+    os.makedirs(Result_A)
+except OSError:
+    pass
+
+try:
+    os.makedirs(Result_B)
 except OSError:
     pass
 
 # Set dir
 data_in_dir = "./data/horse2zebra" # Real data
 pre_train_dir = "./Pre_train" # Pre-train
+
 
 # Setup device
 if torch.cuda.is_available() and not cuda:
@@ -65,7 +81,7 @@ for i, data in progress_bar:
     fake_image_B = 0.5 * (netG_A2B(real_images_A).data + 1.0)
 
     # Save image files
-    vutils.save_image(fake_image_A.detach(), f"./Result/A/{i + 1:04d}.png", normalize=True)
-    vutils.save_image(fake_image_B.detach(), f"./Result/B/{i + 1:04d}.png", normalize=True)
+    vutils.save_image(fake_image_A.detach(), Result_A + f"/{i + 1:04d}.png", normalize=True)
+    vutils.save_image(fake_image_B.detach(), Result_B + f"/{i + 1:04d}.png", normalize=True)
 
     progress_bar.set_description(f"Process images {i + 1} of {len(dataloader)}")
