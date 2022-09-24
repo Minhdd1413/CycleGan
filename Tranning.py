@@ -67,6 +67,7 @@ lr_scheduler_D_B = torch.optim.lr_scheduler.LambdaLR(optimizer_D_B, lr_lambda=lr
 
 fake_A_buffer = ReplayBuffer()
 fake_B_buffer = ReplayBuffer()
+
 # Building loop
 for epoch in range(0, epochs):
     progress_bar = tqdm(enumerate(dataloader), total=len(dataloader))
@@ -80,9 +81,9 @@ for epoch in range(0, epochs):
         real_label = torch.full((batch_size, 1), 1, device=device, dtype=torch.float32)
         fake_label = torch.full((batch_size, 1), 0, device=device, dtype=torch.float32)
 
-        ##############################################
+        ''' ------------------------------------------- '''
         # (1) Update G network: Generators A2B and B2A
-        ##############################################
+        ''' ------------------------------------------- '''
 
         # Set G_A and G_B's gradients to zero
         optimizer_G.zero_grad()
@@ -112,19 +113,19 @@ for epoch in range(0, epochs):
         recovered_image_B = netG_A_to_B(fake_image_A)
         loss_cycle_BAB = cycle_loss(recovered_image_B, real_image_B) * 10.0
 
-        # Combined loss and calculate gradients
+        # Cộng loss and calculate gradients
         errG = loss_identity_A + loss_identity_B + loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB
 
-        # Calculate gradients for G_A and G_B
+        # Tính gradients của G_A và G_B
         errG.backward()
         # Update G_A and G_B's weights
         optimizer_G.step()
 
-        ##############################################
+        ''' ------------------------------------------- '''
         # (2) Update D network: Discriminator A
-        ##############################################
+        ''' ------------------------------------------- '''        
 
-        # Set D_A gradients to zero
+        # Set D_A gradients == zero
         optimizer_D_A.zero_grad()
 
         # Real A image loss
@@ -136,10 +137,10 @@ for epoch in range(0, epochs):
         fake_output_A = netD_A(fake_image_A.detach())
         errD_fake_A = adversarial_loss(fake_output_A, fake_label)
 
-        # Combined loss and calculate gradients
+        # Cộng loss và tính gradients
         errD_A = (errD_real_A + errD_fake_A) / 2
 
-        # Calculate gradients for D_A
+        # Tính gradients D_A
         errD_A.backward()
         # Update D_A weights
         optimizer_D_A.step()
@@ -148,7 +149,7 @@ for epoch in range(0, epochs):
         # (3) Update D network: Discriminator B
         ##############################################
 
-        # Set D_B gradients to zero
+        # Set D_B gradients == zero
         optimizer_D_B.zero_grad()
 
         # Real B image loss
@@ -160,10 +161,10 @@ for epoch in range(0, epochs):
         fake_output_B = netD_B(fake_image_B.detach())
         errD_fake_B = adversarial_loss(fake_output_B, fake_label)
 
-        # Combined loss and calculate gradients
+        # Cộng loss và tính gradients
         errD_B = (errD_real_B + errD_fake_B) / 2
 
-        # Calculate gradients for D_B
+        # Tính gradient D_B
         errD_B.backward()
         # Update D_B weights
         optimizer_D_B.step()
@@ -178,21 +179,35 @@ for epoch in range(0, epochs):
 
         if i % print_freq == 0:
             torchvision.utils.save_image(real_image_A,
-                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
             torchvision.utils.save_image(real_image_B,
-                              sample_out_dir + "/B" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/B" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
             fake_image_A = 0.5 * (netG_B_to_A(real_image_B).data + 1.0)
             fake_image_B = 0.5 * (netG_A_to_B(real_image_A).data + 1.0)
 
             torchvision.utils.save_image(fake_image_A.detach(),
-                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
             torchvision.utils.save_image(fake_image_B.detach(),
-                              sample_out_dir + "/A" + "/real_samples_epoch_{epoch}_{i}.png",
+                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
+    # Lấy điểm 
+    torch.save(netG_A_to_B.state_dict(), f"weights/{args.dataset}/netG_A_to_B_epoch_{epoch}.pth")
+    torch.save(netG_B_to_A.state_dict(), f"weights/{args.dataset}/netG_B_to_A_epoch_{epoch}.pth")
+    torch.save(netD_A.state_dict(), f"weights/{args.dataset}/netD_A_epoch_{epoch}.pth")
+    torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B_epoch_{epoch}.pth")
 
-# Hyperparamater
+    # Update learning rates
+    lr_scheduler_G.step()
+    lr_scheduler_D_A.step()
+    lr_scheduler_D_B.step()
+
+# Save điểm cuối
+torch.save(netG_A_to_B.state_dict(), f"weights/{args.dataset}/netG_A_to_B.pth")
+torch.save(netG_B_to_A.state_dict(), f"weights/{args.dataset}/netG_B_to_A.pth")
+torch.save(netD_A.state_dict(), f"weights/{args.dataset}/netD_A.pth")
+torch.save(netD_B.state_dict(), f"weights/{args.dataset}/netD_B.pth")

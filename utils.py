@@ -24,7 +24,7 @@ class ReplayBuffer:
         return torch.cat(to_return)
 
 
-# custom weights initialization called on netG and netD
+# Setup custom weights 
 def weights_init(m):
     classname = m.__class__.__name__
     if classname.find("Conv") != -1:
