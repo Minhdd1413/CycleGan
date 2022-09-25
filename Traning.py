@@ -12,11 +12,11 @@ import torch
 import itertools
 
 # Hyperparameter settings
-epochs = 200 # Loops
-decay_epochs = 100 # Optimize learning rate
-batch_size = 1 # mini-batch size (default: 1), this is the total batch size of all GPUs on the current node when using Data Parallel or Distributed Data Parallel
+epochs = 100 # Loops
+decay_epochs = 50 # Optimize learning rate
+batch_size = 8 # mini-batch size (default: 1), this is the total batch size of all GPUs on the current node when using Data Parallel or Distributed Data Parallel
 image_size = 256 # Default
-print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
+print_freq = 100 
 lr = 0.0002
 
 # Define dir
@@ -38,8 +38,9 @@ except OSError:
 data_in_dir = "./data/horse2zebra" # Real data
 
 # Set device
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Using {device} device")
+torch.cuda.empty_cache()
+cudnn.benchmark = True
+device = torch.device("cuda:0") # id 0 is default
 
 # Loading data
 dataset = ImageDataset(root=data_in_dir,
@@ -193,37 +194,29 @@ for epoch in range(0, epochs):
             f"loss_G_GAN: {(loss_GAN_A2B + loss_GAN_B2A).item():.4f} "
             f"loss_G_cycle: {(loss_cycle_ABA + loss_cycle_BAB).item():.4f}")
 
-        if i % print_freq == 0:
-            torchvision.utils.save_image(real_image_A,
-                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
-                              normalize=True)
-            torchvision.utils.save_image(real_image_B,
-                              sample_out_dir + "/B" + f"/real_samples_epoch_{epoch}_{i}.png",
-                              normalize=True)
+    if epoch % 5 == 0: # 20 loops 1 save
+        torchvision.utils.save_image(real_image_A,
+                            sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}.png",
+                            normalize=True)
+        torchvision.utils.save_image(real_image_B,
+                            sample_out_dir + "/B" + f"/real_samples_epoch_{epoch}.png",
+                            normalize=True)
+        torchvision.utils.save_image(fake_image_A.detach(),
+                            sample_out_dir + "/A" + f"/fake_samples_epoch_{epoch}.png",
+                            normalize=True)
+        torchvision.utils.save_image(fake_image_B.detach(),
+                            sample_out_dir + "/B" + f"/fake_samples_epoch_{epoch}.png",
+                            normalize=True)
 
-            fake_image_A = 0.5 * (netG_B_to_A(real_image_B).data + 1.0)
-            fake_image_B = 0.5 * (netG_A_to_B(real_image_A).data + 1.0)
-
-            torchvision.utils.save_image(fake_image_A.detach(),
-                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
-                              normalize=True)
-            torchvision.utils.save_image(fake_image_B.detach(),
-                              sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
-                              normalize=True)
-
-    # Lấy data points dc train 
-    torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
-    torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
-    torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
-    torch.save(netD_B.state_dict(), pre_train_dir + f"/netD_B_epoch_{epoch}.pth")
-
+    if epoch % 15 == 0: # 15 loops 1 model if interupted during training 
+        torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
+        torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
+        
     # Update learning rates
     lr_scheduler_G.step()
     lr_scheduler_D_A.step()
     lr_scheduler_D_B.step()
 
-# Save điểm cuối
-torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
-torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
-torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
-torch.save(netD_B.state_dict(), pre_train_dir + f"/netD_B_epoch_{epoch}.pth")
+# Save 
+torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}_end.pth")
+torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}_end.pth")
