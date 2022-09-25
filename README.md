@@ -4,7 +4,7 @@
 - Link pre_train model: 
 - Generator B to A: https://drive.google.com/file/d/1BoGQd1Q5lFHI7f9JOS0PAbUXxdAyCohL/view?usp=sharing 
 - Genetator A to B: https://drive.google.com/file/d/1DVBdguv8TrSFghp3cD4gTngha2YjKV5x/view?usp=sharing
-
+---
 # Traning detail: 
 ### Hardware
 - Gpu = True, 1 Gpu 3090ti
