@@ -3,18 +3,44 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
-from tqdm import tqdm
+import os
 
+from tqdm import tqdm
 from CustomDataset import ImageDataset  # Xử lý testset
 from Network import Generator # G network
 
+# Hyperparameter
 cuda = "store_true"
 image_size = 256
-data_in_dir = data_in_dir = "./CycleGAN/data/horse2zebra"
-pre_train_dir = "./CycleGAN/Pre_train"
 cudnn.benchmark = True
 
+# define dir
+Result = "./Result"
+Result_A = "./Result/A"
+Result_B = "./Result/B"
 
+# ---Make result folder---
+try:
+    os.makedirs(Result)
+except OSError:
+    pass
+
+try:
+    os.makedirs(Result_A)
+except OSError:
+    pass
+
+try:
+    os.makedirs(Result_B)
+except OSError:
+    pass
+
+# Set dir
+data_in_dir = "./data/horse2zebra" # Real data
+pre_train_dir = "./Pre_train" # Pre-train
+
+
+# Setup device
 if torch.cuda.is_available() and not cuda:
     print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
@@ -36,8 +62,8 @@ netG_A2B = Generator().to(device)
 netG_B2A = Generator().to(device)
 
 # Load state dicts
-netG_A2B.load_state_dict(torch.load("./CycleGAN/Pre_train" + "netG_A2B.pth"))
-netG_B2A.load_state_dict(torch.load("./CycleGAN/Pre_train" + "netG_B2A.pth"))
+netG_A2B.load_state_dict(torch.load(pre_train_dir + "netG_A2B.pth"))
+netG_B2A.load_state_dict(torch.load(pre_train_dir + "netG_B2A.pth"))
 
 # Set model mode
 netG_A2B.eval()
@@ -55,7 +81,7 @@ for i, data in progress_bar:
     fake_image_B = 0.5 * (netG_A2B(real_images_A).data + 1.0)
 
     # Save image files
-    vutils.save_image(fake_image_A.detach(), f"./Result/A/{i + 1:04d}.png", normalize=True)
-    vutils.save_image(fake_image_B.detach(), f"./Result/B/{i + 1:04d}.png", normalize=True)
+    vutils.save_image(fake_image_A.detach(), Result_A + f"/{i + 1:04d}.png", normalize=True)
+    vutils.save_image(fake_image_B.detach(), Result_B + f"/{i + 1:04d}.png", normalize=True)
 
     progress_bar.set_description(f"Process images {i + 1} of {len(dataloader)}")

@@ -1,9 +1,9 @@
 # Import thư viện
 from CustomDataset import ImageDataset  # Xử lý dataset
 from Network import Generator, Discriminator # G và D network
-from DecayEpochs import DecayLR # 
+from DecayEpochs import DecayLR # Optimize Epochs
 from torchvision import transforms
-from utils import weights_init, ReplayBuffer
+from utils import weights_init, ReplayBuffer # Custom weight va loss, do mang cycle mang thuoc tinh cua ca 2 mang GAN ><
 from tqdm import tqdm
 
 import torchvision
@@ -13,13 +13,29 @@ import itertools
 
 # Hyperparameter settings
 epochs = 200 # Loops
-decay_epochs = 100 # Số vòng lặp để chạy hàm tuyến tính hoá learning rate
+decay_epochs = 100 # Optimize learning rate
 batch_size = 1 # mini-batch size (default: 1), this is the total batch size of all GPUs on the current node when using Data Parallel or Distributed Data Parallel
 image_size = 256 # Default
 print_freq = 100 # In ra milestone trong quá trình train dưới dạng ảnh
 lr = 0.0002
-data_in_dir = "./CycleGAN/data/horse2zebra"
-sample_out_dir = "./CycleGAN/Sample"
+
+# Define dir
+sample_out_dir = "./Sample" # Check training process by images
+pre_train_dir = "./Pre_train/horse2zebra" # Folder save Pre-train model 
+
+# ---Make some folder---
+try:
+    os.makedirs(sample_out_dir) # Timelapse image processing
+except OSError:
+    pass
+
+try:
+    os.makedirs(pre_train_dir) # Save pre-train model
+except OSError:
+    pass
+
+# Set dir
+data_in_dir = "./data/horse2zebra" # Real data
 
 # Set device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -112,12 +128,12 @@ for epoch in range(0, epochs):
         recovered_image_B = netG_A_to_B(fake_image_A)
         loss_cycle_BAB = cycle_loss(recovered_image_B, real_image_B) * 10.0
 
-        # Cộng loss and calculate gradients
+        # Cộng loss va tinh gradients
         errG = loss_identity_A + loss_identity_B + loss_GAN_A2B + loss_GAN_B2A + loss_cycle_ABA + loss_cycle_BAB
 
         # Tính gradients của G_A và G_B
         errG.backward()
-        # Update G_A and G_B's weights
+        # Update G_A va G_B's weights
         optimizer_G.step()
 
         ''' ------------------------------------------- '''
@@ -144,15 +160,16 @@ for epoch in range(0, epochs):
         # Update D_A weights
         optimizer_D_A.step()
 
-        ##############################################
+        ''' ------------------------------------------- '''
         # (3) Update D network: Discriminator B
-        ##############################################
+        ''' ------------------------------------------- '''
 
         # Set D_B gradients == zero
         optimizer_D_B.zero_grad()
 
         # Real B image loss
         real_output_B = netD_B(real_image_B)
+
         errD_real_B = adversarial_loss(real_output_B, real_label)
 
         # Fake B image loss
@@ -194,11 +211,11 @@ for epoch in range(0, epochs):
                               sample_out_dir + "/A" + f"/real_samples_epoch_{epoch}_{i}.png",
                               normalize=True)
 
-    # Lấy điểm 
-    torch.save(netG_A_to_B.state_dict(), f"Pre_train/horse2zebra/netG_A_to_B_epoch_{epoch}.pth")
-    torch.save(netG_B_to_A.state_dict(), f"Pre_train/horse2zebra/netG_B_to_A_epoch_{epoch}.pth")
-    torch.save(netD_A.state_dict(), f"Pre_train/horse2zebra/netD_A_epoch_{epoch}.pth")
-    torch.save(netD_B.state_dict(), f"Pre_train/horse2zebra/netD_B_epoch_{epoch}.pth")
+    # Lấy data points dc train 
+    torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
+    torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
+    torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
+    torch.save(netD_B.state_dict(), pre_train_dir + f"/netD_B_epoch_{epoch}.pth")
 
     # Update learning rates
     lr_scheduler_G.step()
@@ -206,7 +223,7 @@ for epoch in range(0, epochs):
     lr_scheduler_D_B.step()
 
 # Save điểm cuối
-torch.save(netG_A_to_B.state_dict(), f"Pre_train/horse2zebra/netG_A_to_B.pth")
-torch.save(netG_B_to_A.state_dict(), f"Pre_train/horse2zebra/netG_B_to_A.pth")
-torch.save(netD_A.state_dict(), f"Pre_train/horse2zebra/netD_A.pth")
-torch.save(netD_B.state_dict(), f"Pre_train/horse2zebra/netD_B.pth")
+torch.save(netG_A_to_B.state_dict(), pre_train_dir + f"/netG_A_to_B_epoch_{epoch}.pth")
+torch.save(netG_B_to_A.state_dict(), pre_train_dir + f"/netG_B_to_A_epoch_{epoch}.pth")
+torch.save(netD_A.state_dict(), pre_train_dir + f"/netD_A_epoch_{epoch}.pth")
+torch.save(netD_B.state_dict(), pre_train_dir + f"/netD_B_epoch_{epoch}.pth")
